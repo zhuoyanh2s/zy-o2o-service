@@ -70,3 +70,20 @@ func VerifyJWT(strToken string) (bool, error) {
 	return true, nil
 
 }
+
+// jwt中间件
+var jwtSecret = []byte(viper.GetString("app.JwtSecret"))
+
+func ParseToken(token string) (*Claims, error) {
+	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return jwtSecret, nil
+	})
+
+	if tokenClaims != nil {
+		if claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
+			return claims, nil
+		}
+	}
+
+	return nil, err
+}
